@@ -9,9 +9,13 @@ const messagesEndRef = document.getElementById("messages-end-ref")
 let isLoading = false
 
 // --- API Utility ---
+// ¡IMPORTANTE! Cambia esta URL a la de tu backend desplegado en Render
+const backendUrl = "https://langchain-agent-backend.onrender.com/chat" // <-- ¡Aquí está el cambio!
+
 async function sendMessageToAgent(query) {
   try {
-    const response = await fetch("https://langchain-agent-backend.onrender.com/chat", {
+    const response = await fetch(backendUrl, {
+      // <-- Usamos la nueva URL aquí
       method: "POST",
       headers: {
         "Content-Type": "application/json",
