@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agente Conversacional</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles for fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        /* Custom scrollbar for dark theme */
+        .scroll-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        .scroll-area::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+            border-radius: 10px;
+        }
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 10px;
+        }
+        .scroll-area::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-950 p-4 sm:p-6 lg:p-8">
+
+    <div class="w-full max-w-3xl h-[90vh] flex flex-col shadow-2xl rounded-2xl overflow-hidden border border-gray-700">
+        <!-- Card Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 text-white p-5 rounded-t-2xl shadow-md">
+            <h1 class="text-3xl font-extrabold text-center tracking-wide">✨ Agente Conversacional</h1>
+        </div>
+
+        <!-- Card Content (Chat Messages) -->
+        <div id="chat-messages-container" class="flex-1 p-6 overflow-hidden flex flex-col bg-gray-900">
+            <div id="chat-messages" class="flex-grow pr-4 overflow-y-auto space-y-5 scroll-area">
+                <!-- Messages will be appended here by JavaScript -->
+            </div>
+            <div id="messages-end-ref"></div> <!-- For auto-scroll -->
+        </div>
+
+        <!-- Chat Input -->
+        <form id="chat-input-form" class="flex gap-3 p-4 bg-gray-800 border-t border-gray-700 rounded-b-xl shadow-inner">
+            <input
+                type="text"
+                id="chat-input"
+                class="flex-1 h-12 text-base px-4 bg-gray-700 text-white border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-0"
+                placeholder="Escribe tu mensaje..."
+                autocomplete="off"
+            />
+            <button
+                type="submit"
+                id="send-button"
+                class="h-12 px-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-colors duration-200 flex items-center justify-center"
+            >
+                <span class="lucide lucide-send-horizonal h-5 w-5 mr-2"></span>
+                Enviar
+                <span class="sr-only">Enviar mensaje</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Link to your JavaScript file -->
+    <script src="script.js"></script>
+</body>
+</html>
