@@ -5,17 +5,24 @@ const chatInputForm = document.getElementById("chat-input-form")
 const sendButton = document.getElementById("send-button")
 const messagesEndRef = document.getElementById("messages-end-ref")
 
+const cedulaUpload = document.getElementById("cedula-upload")
+const readCedulaButton = document.getElementById("read-cedula-button")
+const cedulaPreview = document.getElementById("cedula-preview")
+const cedulaPreviewImg = cedulaPreview.querySelector("img")
+
 // --- State Variables ---
 let isLoading = false
+let selectedCedulaFile = null // To store the selected file
 
 // --- API Utility ---
-// ¡IMPORTANTE! Cambia esta URL a la de tu backend desplegado en Render
-const backendUrl = "https://langchain-agent-backend.onrender.com/chat" // <-- ¡Aquí está el cambio!
+// ¡IMPORTANTE! Ahora las URLs son absolutas, apuntando al puerto del backend
+const backendBaseUrl = "https://langchain-agent-backend.onrender.com" // La URL base de tu backend
+const backendChatUrl = `${backendBaseUrl}/api/chat` // Para mensajes de chat
+const backendUploadUrl = `${backendBaseUrl}/api/upload-cedula` // Para subir cédulas
 
 async function sendMessageToAgent(query) {
   try {
-    const response = await fetch(backendUrl, {
-      // <-- Usamos la nueva URL aquí
+    const response = await fetch(backendChatUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -32,6 +39,29 @@ async function sendMessageToAgent(query) {
     return data.response
   } catch (error) {
     console.error("Error en sendMessageToAgent:", error)
+    throw error
+  }
+}
+
+async function uploadCedulaToBackend(file) {
+  try {
+    const formData = new FormData()
+    formData.append("file", file) // 'file' es el nombre del campo esperado por FastAPI
+
+    const response = await fetch(backendUploadUrl, {
+      method: "POST",
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.detail || "Error al procesar la cédula.")
+    }
+
+    const data = await response.json()
+    return data.extracted_data // El backend devolverá los datos extraídos
+  } catch (error) {
+    console.error("Error en uploadCedulaToBackend:", error)
     throw error
   }
 }
@@ -75,15 +105,21 @@ function scrollToBottom() {
   messagesEndRef.scrollIntoView({ behavior: "smooth" })
 }
 
+function setLoadingState(loading) {
+  isLoading = loading
+  chatInput.disabled = loading
+  sendButton.disabled = loading
+  cedulaUpload.disabled = loading
+  readCedulaButton.disabled = loading || !selectedCedulaFile // Disable read button if no file
+  chatInput.placeholder = loading ? "Pensando..." : "Escribe tu mensaje..."
+}
+
 async function handleSendMessage(message) {
   const newUserMessage = createChatMessage(message, "user")
   chatMessages.appendChild(newUserMessage)
   scrollToBottom()
 
-  isLoading = true
-  chatInput.disabled = true
-  sendButton.disabled = true
-  chatInput.placeholder = "Pensando..."
+  setLoadingState(true)
 
   // Add a "thinking" message from the agent
   const thinkingMessage = createChatMessage("Pensando...", "agent")
@@ -108,11 +144,52 @@ async function handleSendMessage(message) {
     )
     chatMessages.appendChild(errorMessage)
   } finally {
-    isLoading = false
-    chatInput.disabled = false
-    sendButton.disabled = false
-    chatInput.placeholder = "Escribe tu mensaje..."
+    setLoadingState(false)
     chatInput.value = "" // Clear input
+    scrollToBottom()
+  }
+}
+
+async function handleReadCedula() {
+  if (!selectedCedulaFile) {
+    alert("Por favor, selecciona un archivo de cédula primero.")
+    return
+  }
+
+  setLoadingState(true)
+
+  const userUploadMessage = createChatMessage("Subiendo y leyendo cédula...", "user")
+  chatMessages.appendChild(userUploadMessage)
+  scrollToBottom()
+
+  const thinkingMessage = createChatMessage("Procesando documento...", "agent")
+  chatMessages.appendChild(thinkingMessage)
+  scrollToBottom()
+
+  try {
+    const extractedData = await uploadCedulaToBackend(selectedCedulaFile)
+    chatMessages.removeChild(thinkingMessage)
+    const agentResponse = `He leído la cédula y extraído la siguiente información:\n\n${extractedData}`
+    const newAgentMessage = createChatMessage(agentResponse, "agent")
+    chatMessages.appendChild(newAgentMessage)
+
+    // Clear the file input and preview after successful upload
+    cedulaUpload.value = ""
+    selectedCedulaFile = null
+    cedulaPreview.classList.add("hidden")
+    cedulaPreviewImg.src = "#"
+  } catch (error) {
+    console.error("Error al leer cédula:", error)
+    if (chatMessages.contains(thinkingMessage)) {
+      chatMessages.removeChild(thinkingMessage)
+    }
+    const errorMessage = createChatMessage(
+      "Disculpa, hubo un error al leer la cédula. Asegúrate de que sea una imagen clara y válida.",
+      "agent",
+    )
+    chatMessages.appendChild(errorMessage)
+  } finally {
+    setLoadingState(false)
     scrollToBottom()
   }
 }
@@ -126,16 +203,41 @@ chatInputForm.addEventListener("submit", (e) => {
   }
 })
 
+cedulaUpload.addEventListener("change", (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    selectedCedulaFile = file
+    readCedulaButton.disabled = false // Enable button when file is selected
+
+    // Show image preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      cedulaPreviewImg.src = e.target.result
+      cedulaPreview.classList.remove("hidden")
+    }
+    reader.readAsDataURL(file)
+  } else {
+    selectedCedulaFile = null
+    readCedulaButton.disabled = true // Disable button if no file
+    cedulaPreview.classList.add("hidden")
+    cedulaPreviewImg.src = "#"
+  }
+})
+
+readCedulaButton.addEventListener("click", handleReadCedula)
+
 // Initial welcome message and Lucide icon initialization
 document.addEventListener("DOMContentLoaded", () => {
   const welcomeMessage = createChatMessage(
-    "¡Hola! Soy tu asistente conversacional. ¿En qué puedo ayudarte hoy?",
+    "¡Hola! Soy tu asistente conversacional. ¿En qué puedo ayudarte hoy? También puedo leer datos de una cédula.",
     "agent",
   )
   chatMessages.appendChild(welcomeMessage)
   scrollToBottom()
   // Initialize Lucide icons
   window.lucide.createIcons()
+  // Initially disable the read cedula button
+  readCedulaButton.disabled = true
 })
 
 // Re-render Lucide icons after new messages are added (optional, but good practice if icons are dynamic)

@@ -50,28 +50,59 @@
             <div id="messages-end-ref"></div> <!-- For auto-scroll -->
         </div>
 
-        <!-- Chat Input -->
-        <form id="chat-input-form" class="flex gap-3 p-4 bg-gray-800 border-t border-gray-700 rounded-b-xl shadow-inner">
-            <input
-                type="text"
-                id="chat-input"
-                class="flex-1 h-12 text-base px-4 bg-gray-700 text-white border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-0"
-                placeholder="Escribe tu mensaje..."
-                autocomplete="off"
-            />
-            <button
-                type="submit"
-                id="send-button"
-                class="h-12 px-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-colors duration-200 flex items-center justify-center"
-            >
-                <span class="lucide lucide-send-horizonal h-5 w-5 mr-2"></span>
-                Enviar
-                <span class="sr-only">Enviar mensaje</span>
-            </button>
-        </form>
+        <!-- Chat Input and File Upload -->
+        <div class="p-4 bg-gray-800 border-t border-gray-700 rounded-b-xl shadow-inner">
+            <!-- File Upload Section -->
+            <div class="mb-4 p-3 border border-gray-700 rounded-md bg-gray-700 flex flex-col items-center justify-center">
+                <label for="cedula-upload" class="text-gray-300 text-sm mb-2">Sube una imagen de cédula para leer sus datos:</label>
+                <input
+                    type="file"
+                    id="cedula-upload"
+                    accept="image/*"
+                    class="block w-full text-sm text-gray-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-red-500 file:text-white
+                    hover:file:bg-red-600 cursor-pointer"
+                />
+                <button
+                    type="button"
+                    id="read-cedula-button"
+                    class="mt-3 w-full px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span class="lucide lucide-scan-text h-5 w-5 mr-2"></span>
+                    Leer Cédula
+                    <span class="sr-only">Leer datos de la cédula</span>
+                </button>
+                <div id="cedula-preview" class="mt-3 hidden">
+                    <img src="#" alt="Vista previa de la cédula" class="max-w-full h-auto rounded-md border border-gray-600" />
+                </div>
+            </div>
+
+            <!-- Chat Input Section -->
+            <form id="chat-input-form" class="flex gap-3">
+                <input
+                    type="text"
+                    id="chat-input"
+                    class="flex-1 h-12 text-base px-4 bg-gray-700 text-white border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-0"
+                    placeholder="Escribe tu mensaje..."
+                    autocomplete="off"
+                />
+                <button
+                    type="submit"
+                    id="send-button"
+                    class="h-12 px-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span class="lucide lucide-send-horizonal h-5 w-5 mr-2"></span>
+                    Enviar
+                    <span class="sr-only">Enviar mensaje</span>
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Link to your JavaScript file -->
-    <script src="script.js"></script>
+    <script src="script.js"></script> <!-- CAMBIO AQUÍ: Ruta relativa directa -->
 </body>
 </html>
