@@ -21,8 +21,8 @@ let selectedCedulaFile = null // To store the selected file
 
 // --- API Utility ---
 // URLs absolutas para cuando el frontend y el backend se ejecutan en puertos diferentes
-const backendChatUrl = "http://localhost:8000/api/chat"
-const backendUploadUrl = "http://localhost:8000/api/upload-cedula"
+const backendChatUrl = "https://langchain-agent-backend.onrender.com/api/chat"
+const backendUploadUrl = "https://langchain-agent-backend.onrender.com/api/upload-cedula"
 
 // Function to update token display
 function updateTokenDisplay(tokenUsage) {
