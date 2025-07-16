@@ -1,108 +1,162 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agente Conversacional</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* Custom styles for fade-in animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        /* Custom scrollbar for dark theme */
-        .scroll-area::-webkit-scrollbar {
-            width: 8px;
-        }
-        .scroll-area::-webkit-scrollbar-track {
-            background: #1f2937; /* gray-800 */
-            border-radius: 10px;
-        }
-        .scroll-area::-webkit-scrollbar-thumb {
-            background: #4b5563; /* gray-600 */
-            border-radius: 10px;
-        }
-        .scroll-area::-webkit-scrollbar-thumb:hover {
-            background: #6b7280; /* gray-500 */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asistente Glitch</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+      /* Custom styles for fade-in animation with a slight glitch effect */
+      @keyframes fadeInGlitch {
+          0% { opacity: 0; transform: translateY(20px) skewX(5deg); filter: blur(5px); }
+          50% { opacity: 0.8; transform: translateY(-5px) skewX(-2deg); filter: blur(1px); }
+          100% { opacity: 1; transform: translateY(0) skewX(0deg); filter: blur(0); }
+      }
+      .animate-fade-in-glitch {
+          animation: fadeInGlitch 0.6s ease-out forwards;
+      }
+
+      /* Custom scrollbar for dark theme */
+      .scroll-area::-webkit-scrollbar {
+          width: 8px;
+      }
+      .scroll-area::-webkit-scrollbar-track {
+          background: #1a1a2e; /* Dark blue-purple */
+          border-radius: 10px;
+      }
+      .scroll-area::-webkit-scrollbar-thumb {
+          background: #6a0dad; /* Darker purple */
+          border-radius: 10px;
+      }
+      .scroll-area::-webkit-scrollbar-thumb:hover {
+          background: #8a2be2; /* Brighter purple */
+      }
+
+      /* Custom border for main container */
+      .glitch-border {
+          border-image: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff) 1;
+          border-width: 3px;
+          border-style: solid;
+          box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.5);
+      }
+
+      /* Custom message bubble shapes */
+      .user-bubble {
+          border-radius: 15px 5px 15px 5px; /* Asymmetrical border-radius */
+          background: linear-gradient(135deg, #ff00ff, #8a2be2); /* Fuchsia to BlueViolet */
+          box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+      }
+      .agent-bubble {
+          border-radius: 5px 15px 5px 15px; /* Asymmetrical border-radius */
+          background: linear-gradient(135deg, #00ffff, #00bfff); /* Cyan to DeepSkyBlue */
+          box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      }
+
+      /* Glitch spinner */
+      .glitch-spinner {
+          border-top-color: #ff00ff;
+          border-right-color: #00ffff;
+          border-bottom-color: #ff00ff;
+          border-left-color: #00ffff;
+          animation: spin 0.8s linear infinite, glitch-color 1.5s infinite alternate;
+      }
+
+      @keyframes glitch-color {
+          0% { border-color: #ff00ff #00ffff #ff00ff #00ffff; }
+          25% { border-color: #00ffff #ff00ff #00ffff #ff00ff; }
+          50% { border-color: #ff00ff #00ffff #ff00ff #00ffff; }
+          75% { border-color: #00ffff #ff00ff #00ffff #ff00ff; }
+          100% { border-color: #ff00ff #00ffff #ff00ff #00ffff; }
+      }
+  </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen bg-gray-950 p-4 sm:p-6 lg:p-8">
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-950 p-4 sm:p-6 lg:p-8 font-mono text-gray-100">
 
-    <div class="w-full max-w-3xl h-[90vh] flex flex-col shadow-2xl rounded-2xl overflow-hidden border border-gray-700">
-        <!-- Card Header -->
-        <div class="bg-gradient-to-r from-red-700 to-red-900 text-white p-5 rounded-t-2xl shadow-md">
-            <h1 class="text-3xl font-extrabold text-center tracking-wide">✨ Agente Conversacional</h1>
-        </div>
+  <div class="w-full max-w-3xl h-[90vh] flex flex-col bg-gray-800 shadow-2xl rounded-2xl overflow-hidden glitch-border transform rotate-1 skew-x-1">
+      <!-- Card Header -->
+      <header class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-5 shadow-md flex items-center justify-center relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-700 to-cyan-700 opacity-30 transform skew-y-3 scale-110"></div>
+          <span class="lucide lucide-zap h-8 w-8 mr-4 text-fuchsia-400 z-10 transform rotate-12"></span>
+          <h1 class="text-4xl font-extrabold text-center tracking-wider z-10 transform -skew-x-3">
+              <span class="text-fuchsia-300">A</span>sistente <span class="text-cyan-300">G</span>litch
+          </h1>
+          <span class="lucide lucide-cpu h-8 w-8 ml-4 text-cyan-400 z-10 transform -rotate-12"></span>
+      </header>
 
-        <!-- Card Content (Chat Messages) -->
-        <div id="chat-messages-container" class="flex-1 p-6 overflow-hidden flex flex-col bg-gray-900">
-            <div id="chat-messages" class="flex-grow pr-4 overflow-y-auto space-y-5 scroll-area">
-                <!-- Messages will be appended here by JavaScript -->
-            </div>
-            <div id="messages-end-ref"></div> <!-- For auto-scroll -->
-        </div>
+      <!-- Card Content (Chat Messages) -->
+      <main id="chat-messages-container" class="flex-1 p-6 overflow-hidden flex flex-col bg-gray-900">
+          <div id="chat-messages" class="flex-grow pr-4 overflow-y-auto space-y-6 scroll-area">
+              <!-- Messages will be appended here by JavaScript -->
+          </div>
+          <div id="messages-end-ref"></div> <!-- For auto-scroll -->
+      </main>
 
-        <!-- Chat Input and File Upload -->
-        <div class="p-4 bg-gray-800 border-t border-gray-700 rounded-b-xl shadow-inner">
-            <!-- File Upload Section -->
-            <div class="mb-4 p-3 border border-gray-700 rounded-md bg-gray-700 flex flex-col items-center justify-center">
-                <label for="cedula-upload" class="text-gray-300 text-sm mb-2">Sube una imagen de cédula para leer sus datos:</label>
-                <input
-                    type="file"
-                    id="cedula-upload"
-                    accept="image/*"
-                    class="block w-full text-sm text-gray-400
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-full file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-red-500 file:text-white
-                    hover:file:bg-red-600 cursor-pointer"
-                />
-                <button
-                    type="button"
-                    id="read-cedula-button"
-                    class="mt-3 w-full px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <span class="lucide lucide-scan-text h-5 w-5 mr-2"></span>
-                    Leer Cédula
-                    <span class="sr-only">Leer datos de la cédula</span>
-                </button>
-                <div id="cedula-preview" class="mt-3 hidden">
-                    <img src="#" alt="Vista previa de la cédula" class="max-w-full h-auto rounded-md border border-gray-600" />
-                </div>
-            </div>
+      <!-- Chat Input and File Upload -->
+      <div class="p-6 bg-gray-800 border-t border-gray-700 rounded-b-xl shadow-inner relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-tl from-fuchsia-900 to-cyan-900 opacity-20 transform skew-y-2 scale-105"></div>
 
-            <!-- Chat Input Section -->
-            <form id="chat-input-form" class="flex gap-3">
-                <input
-                    type="text"
-                    id="chat-input"
-                    class="flex-1 h-12 text-base px-4 bg-gray-700 text-white border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-0"
-                    placeholder="Escribe tu mensaje..."
-                    autocomplete="off"
-                />
-                <button
-                    type="submit"
-                    id="send-button"
-                    class="h-12 px-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <span class="lucide lucide-send-horizonal h-5 w-5 mr-2"></span>
-                    Enviar
-                    <span class="sr-only">Enviar mensaje</span>
-                </button>
-            </form>
-        </div>
-    </div>
+          <!-- File Upload Section -->
+          <div class="mb-5 p-4 border border-fuchsia-700 rounded-lg bg-gray-700 flex flex-col items-center justify-center relative z-10 transform -rotate-1 skew-y-1">
+              <label for="cedula-upload" class="text-gray-300 text-sm mb-3 font-bold tracking-wide">
+                  <span class="lucide lucide-upload h-4 w-4 inline-block mr-2 text-cyan-400"></span>
+                  Carga un archivo para análisis:
+              </label>
+              <input
+                  type="file"
+                  id="cedula-upload"
+                  accept="image/*"
+                  class="block w-full text-sm text-gray-400
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-fuchsia-600 file:text-white
+                  hover:file:bg-fuchsia-700 cursor-pointer transition-all duration-300"
+              />
+              <button
+                  type="button"
+                  id="read-cedula-button"
+                  class="mt-4 w-full px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transform skew-x-2"
+              >
+                  <span class="lucide lucide-scan-text h-5 w-5 mr-2"></span>
+                  Procesar Documento
+                  <span class="sr-only">Leer datos de la cédula</span>
+              </button>
+              <div id="cedula-preview" class="mt-4 hidden">
+                  <img src="#" alt="Vista previa del documento" class="max-w-full h-auto rounded-md border border-fuchsia-500 transform rotate-1 scale-95" />
+              </div>
+          </div>
 
-    <!-- Link to your JavaScript file -->
-    <script src="script.js"></script> <!-- CAMBIO AQUÍ: Ruta relativa directa -->
+          <!-- Chat Input Section -->
+          <form id="chat-input-form" class="flex gap-4 relative z-10">
+              <input
+                  type="text"
+                  id="chat-input"
+                  class="flex-1 h-14 text-base px-5 bg-gray-700 text-gray-100 border border-cyan-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent placeholder-gray-400 transform skew-x-1"
+                  placeholder="Ingresa tu consulta aquí..."
+                  autocomplete="off"
+              />
+              <button
+                  type="submit"
+                  id="send-button"
+                  class="h-14 px-7 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transform -skew-x-1"
+              >
+                  <span class="lucide lucide-send-horizonal h-6 w-6 mr-2"></span>
+                  Enviar
+                  <span class="sr-only">Enviar mensaje</span>
+              </button>
+          </form>
+
+          <!-- Token Counter Display -->
+          <div id="token-counter" class="mt-4 text-center text-xs text-gray-400">
+              Tokens: Entrada <span id="prompt-tokens">0</span> | Salida <span id="completion-tokens">0</span> | Total <span id="total-tokens">0</span>
+          </div>
+      </div>
+  </div>
+
+  <!-- Link to your JavaScript file -->
+  <script src="script.js"></script>
 </body>
 </html>

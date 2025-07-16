@@ -10,15 +10,26 @@ const readCedulaButton = document.getElementById("read-cedula-button")
 const cedulaPreview = document.getElementById("cedula-preview")
 const cedulaPreviewImg = cedulaPreview.querySelector("img")
 
+// Token counter elements
+const promptTokensSpan = document.getElementById("prompt-tokens")
+const completionTokensSpan = document.getElementById("completion-tokens")
+const totalTokensSpan = document.getElementById("total-tokens")
+
 // --- State Variables ---
 let isLoading = false
 let selectedCedulaFile = null // To store the selected file
 
 // --- API Utility ---
-// ¡IMPORTANTE! Ahora las URLs son absolutas, apuntando al puerto del backend
-const backendBaseUrl = "https://langchain-agent-backend.onrender.com" // La URL base de tu backend
-const backendChatUrl = `${backendBaseUrl}/api/chat` // Para mensajes de chat
-const backendUploadUrl = `${backendBaseUrl}/api/upload-cedula` // Para subir cédulas
+// URLs absolutas para cuando el frontend y el backend se ejecutan en puertos diferentes
+const backendChatUrl = "http://localhost:8000/api/chat"
+const backendUploadUrl = "http://localhost:8000/api/upload-cedula"
+
+// Function to update token display
+function updateTokenDisplay(tokenUsage) {
+  promptTokensSpan.textContent = tokenUsage.prompt_tokens || 0
+  completionTokensSpan.textContent = tokenUsage.completion_tokens || 0
+  totalTokensSpan.textContent = tokenUsage.total_tokens || 0
+}
 
 async function sendMessageToAgent(query) {
   try {
@@ -36,7 +47,7 @@ async function sendMessageToAgent(query) {
     }
 
     const data = await response.json()
-    return data.response
+    return data // Return full data including token_usage
   } catch (error) {
     console.error("Error en sendMessageToAgent:", error)
     throw error
@@ -59,7 +70,7 @@ async function uploadCedulaToBackend(file) {
     }
 
     const data = await response.json()
-    return data.extracted_data // El backend devolverá los datos extraídos
+    return data // Return full data including token_usage
   } catch (error) {
     console.error("Error en uploadCedulaToBackend:", error)
     throw error
@@ -70,30 +81,31 @@ async function uploadCedulaToBackend(file) {
 function createChatMessage(message, sender) {
   const isUser = sender === "user"
   const messageDiv = document.createElement("div")
-  messageDiv.className = `flex items-start gap-3 mb-4 animate-fade-in ${isUser ? "justify-end" : "justify-start"}`
+  // Apply the new glitch animation
+  messageDiv.className = `flex items-start gap-3 mb-4 animate-fade-in-glitch ${isUser ? "justify-end" : "justify-start"}`
 
   if (!isUser) {
     const agentAvatar = `
-            <div class="h-9 w-9 border-2 border-gray-600 shadow-sm rounded-full flex items-center justify-center bg-blue-500 text-white text-lg font-semibold">🤖</div>
-        `
+          <div class="h-10 w-10 border-2 border-cyan-500 shadow-md rounded-full flex items-center justify-center bg-cyan-700 text-white text-xl font-bold transform rotate-6">🤖</div>
+      `
     messageDiv.innerHTML += agentAvatar
   }
 
   const messageBubble = `
-        <div class="max-w-[70%] p-4 text-base shadow-lg transition-all duration-300 ease-in-out ${
-          isUser
-            ? "bg-red-600 text-white rounded-t-xl rounded-bl-xl"
-            : "bg-gray-700 text-gray-100 rounded-t-xl rounded-br-xl border border-gray-600"
-        }">
-            ${message}
-        </div>
-    `
+      <div class="max-w-[70%] p-4 text-base shadow-lg transition-all duration-300 ease-in-out ${
+        isUser
+          ? "user-bubble text-white" // Custom class for user bubble
+          : "agent-bubble text-gray-900" // Custom class for agent bubble
+      }">
+          ${message}
+      </div>
+  `
   messageDiv.innerHTML += messageBubble
 
   if (isUser) {
     const userAvatar = `
-            <div class="h-9 w-9 border-2 border-gray-600 shadow-sm rounded-full flex items-center justify-center bg-gray-600 text-white text-lg font-semibold">👤</div>
-        `
+          <div class="h-10 w-10 border-2 border-fuchsia-500 shadow-md rounded-full flex items-center justify-center bg-fuchsia-700 text-white text-xl font-bold transform -rotate-6">👤</div>
+      `
     messageDiv.innerHTML += userAvatar
   }
 
@@ -111,7 +123,22 @@ function setLoadingState(loading) {
   sendButton.disabled = loading
   cedulaUpload.disabled = loading
   readCedulaButton.disabled = loading || !selectedCedulaFile // Disable read button if no file
-  chatInput.placeholder = loading ? "Pensando..." : "Escribe tu mensaje..."
+  chatInput.placeholder = loading ? "Procesando datos..." : "Ingresa tu consulta aquí..."
+
+  // Add/remove loading spinner on send button
+  const sendIcon = sendButton.querySelector(".lucide-send-horizonal")
+  const spinner = sendButton.querySelector(".loading-spinner")
+  if (loading) {
+    if (sendIcon) sendIcon.classList.add("hidden")
+    if (!spinner) {
+      const newSpinner = document.createElement("span")
+      newSpinner.className = "loading-spinner glitch-spinner animate-spin h-6 w-6 border-4 rounded-full" // Apply glitch-spinner
+      sendButton.prepend(newSpinner)
+    }
+  } else {
+    if (sendIcon) sendIcon.classList.remove("hidden")
+    if (spinner) spinner.remove()
+  }
 }
 
 async function handleSendMessage(message) {
@@ -122,16 +149,22 @@ async function handleSendMessage(message) {
   setLoadingState(true)
 
   // Add a "thinking" message from the agent
-  const thinkingMessage = createChatMessage("Pensando...", "agent")
+  const thinkingMessage = createChatMessage("Analizando...", "agent")
   chatMessages.appendChild(thinkingMessage)
   scrollToBottom()
 
   try {
-    const agentResponse = await sendMessageToAgent(message)
+    const responseData = await sendMessageToAgent(message) // Get full response data
+
     // Remove the "thinking" message
     chatMessages.removeChild(thinkingMessage)
+
+    const agentResponse = responseData.response
+    const tokenUsage = responseData.token_usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
+
     const newAgentMessage = createChatMessage(agentResponse, "agent")
     chatMessages.appendChild(newAgentMessage)
+    updateTokenDisplay(tokenUsage) // Update token display
   } catch (error) {
     console.error("Error al enviar mensaje:", error)
     // Remove the "thinking" message if it's still there
@@ -139,10 +172,11 @@ async function handleSendMessage(message) {
       chatMessages.removeChild(thinkingMessage)
     }
     const errorMessage = createChatMessage(
-      "Disculpa, hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo más tarde.",
+      "Error de conexión. El sistema está experimentando fallos. Intenta de nuevo.",
       "agent",
     )
     chatMessages.appendChild(errorMessage)
+    updateTokenDisplay({ prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }) // Reset tokens on error
   } finally {
     setLoadingState(false)
     chatInput.value = "" // Clear input
@@ -152,31 +186,44 @@ async function handleSendMessage(message) {
 
 async function handleReadCedula() {
   if (!selectedCedulaFile) {
-    alert("Por favor, selecciona un archivo de cédula primero.")
+    alert("Error: No se ha detectado ningún archivo. Por favor, selecciona un documento.")
     return
   }
 
   setLoadingState(true)
 
-  const userUploadMessage = createChatMessage("Subiendo y leyendo cédula...", "user")
+  const userUploadMessage = createChatMessage("Iniciando protocolo de carga...", "user")
   chatMessages.appendChild(userUploadMessage)
   scrollToBottom()
 
-  const thinkingMessage = createChatMessage("Procesando documento...", "agent")
+  const thinkingMessage = createChatMessage("Decodificando datos...", "agent")
   chatMessages.appendChild(thinkingMessage)
   scrollToBottom()
 
   try {
-    const extractedData = await uploadCedulaToBackend(selectedCedulaFile)
-    chatMessages.removeChild(thinkingMessage)
-    const agentResponse = `He leído la cédula y extraído la siguiente información:\n\n${extractedData}`
-    const newAgentMessage = createChatMessage(agentResponse, "agent")
-    chatMessages.appendChild(newAgentMessage)
+    const responseData = await uploadCedulaToBackend(selectedCedulaFile) // Get full response data
 
-    // Clear the file input and preview after successful upload
+    chatMessages.removeChild(thinkingMessage)
+
+    let agentResponseText
+    // Check if the response contains a 'response' field (indicating a validation error message)
+    if (responseData.response) {
+      agentResponseText = responseData.response
+    } else {
+      // Otherwise, it's successful extracted data
+      agentResponseText = `[DATOS EXTRAÍDOS]:\n\n${responseData.extracted_data}`
+    }
+
+    const tokenUsage = responseData.token_usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
+
+    const newAgentMessage = createChatMessage(agentResponseText, "agent")
+    chatMessages.appendChild(newAgentMessage)
+    updateTokenDisplay(tokenUsage) // Update token display
+
+    // Clear the file input and preview after processing (regardless of validation success)
     cedulaUpload.value = ""
     selectedCedulaFile = null
-    cedulaPreview.classList.add("hidden")
+    cedulaPreview.classList.add("hidden") // Ensure preview is hidden
     cedulaPreviewImg.src = "#"
   } catch (error) {
     console.error("Error al leer cédula:", error)
@@ -184,10 +231,11 @@ async function handleReadCedula() {
       chatMessages.removeChild(thinkingMessage)
     }
     const errorMessage = createChatMessage(
-      "Disculpa, hubo un error al leer la cédula. Asegúrate de que sea una imagen clara y válida.",
+      "Fallo en la lectura del documento. Verifique la integridad del archivo e intente de nuevo.",
       "agent",
     )
     chatMessages.appendChild(errorMessage)
+    updateTokenDisplay({ prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }) // Reset tokens on error
   } finally {
     setLoadingState(false)
     scrollToBottom()
@@ -209,13 +257,9 @@ cedulaUpload.addEventListener("change", (event) => {
     selectedCedulaFile = file
     readCedulaButton.disabled = false // Enable button when file is selected
 
-    // Show image preview
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      cedulaPreviewImg.src = e.target.result
-      cedulaPreview.classList.remove("hidden")
-    }
-    reader.readAsDataURL(file)
+    // No longer showing image preview
+    cedulaPreview.classList.add("hidden") // Ensure it's hidden
+    cedulaPreviewImg.src = "#" // Clear any previous image
   } else {
     selectedCedulaFile = null
     readCedulaButton.disabled = true // Disable button if no file
@@ -229,7 +273,7 @@ readCedulaButton.addEventListener("click", handleReadCedula)
 // Initial welcome message and Lucide icon initialization
 document.addEventListener("DOMContentLoaded", () => {
   const welcomeMessage = createChatMessage(
-    "¡Hola! Soy tu asistente conversacional. ¿En qué puedo ayudarte hoy? También puedo leer datos de una cédula.",
+    "// INICIANDO SISTEMA // Asistente Glitch en línea. ¿Qué anomalía deseas investigar hoy? También puedo procesar documentos.",
     "agent",
   )
   chatMessages.appendChild(welcomeMessage)
