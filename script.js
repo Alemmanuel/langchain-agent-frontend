@@ -289,3 +289,4 @@ const observer = new MutationObserver(() => {
   window.lucide.createIcons()
 })
 observer.observe(chatMessages, { childList: true, subtree: true })
+// Add CSS for the glitch spinner
